@@ -1,0 +1,107 @@
+---
+title: "Vignette walkthrough of gene expression variability across species for heart and kidney tissue"
+output: html_document
+editor_options:
+  markdown:
+    wrap: 72
+---
+
+# R Script Following Steps from Vignett of the Coefficient of Variant calculations across kidney and heart tissue of humans and rats
+
+## Installing Dependencies
+
+__ !!! IMPORTANT NOTE !!! ___
+
+__ Source the `functions/environment_setup.R` script in R environment to install `dplyr`, `BioConductor`, and `CoSIA` as packages.  Removed from the R Notebooks to reduce time and complexity of them.
+
+```{r install-dependencies, message=FALSE, warning=FALSE}
+beginning_time <- Sys.time()
+library(dplyr)
+library(CoSIA)
+```
+
+## Loading Monogenic Kidney Genes as sample genes to use
+
+```{r loading-gene-data, message=FALSE, warning=FALSE}
+load("../inst/extdata/proccessed/monogenic_kidney_genes.rda")
+set.seed(42)
+monogenic_kid_sample <- dplyr::sample_n(monogenic_kidney_genes, 20)
+monogenic_kid_sample
+```
+
+## Get Tissues For Species
+
+> Quote from vignette: To compare across all shared tissues for your
+> selected species, you can assign the `getTissues` output to an object
+> as input for map_tissues when initializing a `CoSIAn` object.
+
+notes: \
+- “\_r_noregicus\_” in the vignette options in (#tab:Table1.) is
+"\_r_norvegicus\_"\
+- Saving the results of `CoSIA::getTissues` into a variable. However,
+the walk through of the vignette is not using it.
+
+```{r gathering-tissue-data, message=FALSE, warning=FALSE}
+output_species <- c("h_sapiens", "r_norvegicus")
+map_tissues <- CoSIA::getTissues(output_species)
+```
+
+## Configuring the base CoSIA package mostly similar in vignette 1.2.4
+
+notes:\
+- Not using all the tissues in this example, just
+`` `adult mammalian kidney & heart` ``\
+- Using mouse, rate, human as output species to generate matching gene
+expression plot later in vignette walk through
+
+todo: Read manual for the map_species parameter
+
+```{r cosia-initialize}
+CoSIAn_Obj_Vignette_coefficient_variation_tissue = CoSIA::CoSIAn(
+  gene_set = unique(monogenic_kid_sample$Gene),
+  i_species = "h_sapiens",
+  o_species = c(
+    "h_sapiens",
+    "r_norvegicus"
+  ),
+  input_id = "Symbol",
+  output_ids = "Ensembl_id",
+  map_species = c(
+    "h_sapiens",
+    "r_norvegicus"
+  ),
+  map_tissues = c(
+    "adult mammalian kidney",
+    "heart"
+  ),
+  mapping_tool = "annotationDBI",
+  ortholog_database = "HomoloGene",
+  metric_type = "CV_Tissue" # Calculating it across tissue
+)
+```
+
+## Calculating species unique identifier mappings based on input gene symbol
+
+```{r cosia-id-mapping}
+CoSIAn_Obj_Vignette_coefficient_variation_tissue_convert <- CoSIA::getConversion(CoSIAn_Obj_Vignette_coefficient_variation_tissue)
+head(CoSIA::viewCoSIAn(CoSIAn_Obj_Vignette_coefficient_variation_tissue_convert, "converted_id"))
+```
+
+## Coefficient of Variation for Human and Rat Tissue
+
+note: \# metric_type = "CV_Tissue"
+
+Below is a reference example image of the expected plot from the vignette
+<img src="../inst/images/CoSIA_CV_example.png" alt="Figure: Gene Expression Variability Across Species in Kidney Tissue" width="703"/>
+
+
+```{r coefficient-of-variation-human-rat-tissue,  dpi=200, fig.height=13, fig.width=6 }
+CoSIA_Vignette_expression_human_rat_tissue <- CoSIA::getGExMetrics(CoSIAn_Obj_Vignette_coefficient_variation_tissue_convert)
+CoSIA_Vignette_coefficient_variation_plot_tissue <- CoSIA::plotCVGEx(CoSIA_Vignette_expression_human_rat_tissue)
+CoSIA_Vignette_coefficient_variation_plot_tissue
+
+end_time <- Sys.time()
+
+time.loop <- end_time - beginning_time
+cat("Time elapsed: ", round((time.loop),3), " minutes")
+```

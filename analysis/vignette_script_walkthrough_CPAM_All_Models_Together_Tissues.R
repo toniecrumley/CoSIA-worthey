@@ -1,0 +1,53 @@
+# R Script Following Steps from vignette to plot the gene expression variability
+# across species common tissue types of Human and CPAM animal model type
+# used
+
+# Install Dependencies
+beginning_time <- Sys.time()
+source('./analysis/functions/CoSIA_Instance.R')
+
+if ( 'dplyr' %in% installed.packages() )
+  remove.packages("dplyr")
+install.packages("dplyr", dependencies=TRUE)
+library(dplyr)
+
+if (!require("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+BiocManager::install("CoSIA")
+
+# Loading Dependencies
+library(CoSIA)
+
+# Get Tissues For Species
+input_species <- c("h_sapiens")
+model_comparing <- c("m_musculus", "r_norvegicus", "d_rerio")
+output_species <- c(model_comparing, input_species)
+
+cat("1. Getting tissues for species to compare with human - ", model_comparing)
+map_tissues <- CoSIA::getTissues(output_species)
+common_tissues <- map_tissues[["Common_Anatomical_Entity_Name"]]
+
+#
+# Coefficient of Variation of Tissue
+#
+cat("2. Configuring CoSIA base library on data to process with human - ", model_comparing)
+HumanAndAnimalModel_CoSIA <- CoSIA_Instance$new("VMA21", "h_sapiens", output_species, common_tissues, "CV_Tissue")
+HumanAndAnimalModel_CoSIA$configure()
+
+cat("3. Converting the Input Gene set and getting identifier mappings")
+HumanAndAnimalModel_CoSIA$identifier_map()
+
+# metric_type = "CV_Tissue" # Calculating it across species
+cat("4. Calculating the expression metrics need for Coefficient Of Variation plot for", model_comparing)
+HumanAndAnimalModel_CoSIA$calculate_expression_metrics()
+
+cat("5. Calculating the Coefficient of Variation across species for ", model_comparing)
+HumanAndAnimalModel_CoSIA$calculate_coefficient_variation_plot()
+
+HumanAndAnimalModel_CoSIA$coefficient_variation_plot
+
+end_time <- Sys.time()
+
+time.loop <- end_time - beginning_time
+cat("Time elapsed: ", round((time.loop),3), " minutes")
+

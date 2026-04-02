@@ -1,0 +1,89 @@
+---
+title: "Vignette walkthrough of gene expression diversity and specificity across tissues and species for monogenic kidney-disease associated genes"
+output: html_document
+editor_options:
+  markdown:
+    wrap: 72
+---
+
+# R Script Following Steps from Vignette for diversity and specificity across tissues and species for monogenic kidney-disease associated genes
+
+## Installing Dependencies
+
+_!!! IMPORTANT NOTE !!!_
+
+_Source the `functions/environment_setup.R` script in R environment to install `dplyr`, `BioConductor`, and `CoSIA` as packages.  Removed from the R Notebooks to reduce time and complexity of them._
+
+```{r install-dependencies, message=FALSE, warning=FALSE}
+beginning_time <- Sys.time()
+library(dplyr)
+library(CoSIA)
+```
+
+## Loading Monogenic Kidney Genes as sample genes to use
+
+```{r loading-gene-data, message=FALSE, warning=FALSE}
+load("../inst/extdata/proccessed/monogenic_kidney_genes.rda")
+set.seed(42)
+monogenic_kid_sample <- dplyr::sample_n(monogenic_kidney_genes, 20)
+monogenic_kid_sample
+```
+
+## Get Tissues For Species
+
+```{r gathering-tissue-data, message=FALSE, warning=FALSE}
+output_species <- c("h_sapiens", "r_norvegicus")
+map_tissues <- CoSIA::getTissues(output_species)
+```
+
+## Configuring the base CoSIA package like in vignette 1.2.4
+
+notes:\
+- Not using all the tissues in this example, just
+`adult mammalian kidney & heart`\
+
+```{r cosia-initialize}
+CoSIAn_Obj_Vignette_diversity_specificity = CoSIA::CoSIAn(
+  gene_set = unique(monogenic_kid_sample$Gene),
+  i_species = "h_sapiens",
+  o_species = c(
+    "h_sapiens",
+    "r_norvegicus"
+  ),
+  input_id = "Symbol",
+  output_ids = "Ensembl_id",
+  map_species = c(
+    "h_sapiens",
+    "r_norvegicus"
+  ),
+  map_tissues = c(
+    "adult mammalian kidney",
+    "heart"
+  ),
+  mapping_tool = "annotationDBI",
+  ortholog_database = "HomoloGene",
+  metric_type = "DS_Tissue" # across tissue
+)
+```
+
+## Calculating species unique identifier mappings based on input gene symbol
+
+```{r cosia-id-mapping}
+CoSIAn_Obj_Vignette_diversity_specificity_convert <- CoSIA::getConversion(CoSIAn_Obj_Vignette_diversity_specificity)
+head(CoSIA::viewCoSIAn(CoSIAn_Obj_Vignette_diversity_specificity_convert, "converted_id"))
+```
+
+## Diversity of Specificity Across Tissues
+
+note: \# metric_type = "DF_Tissue"
+
+```{r diversity-specificity-human-rat-tissue,  dpi=200, fig.height=13, fig.width=6 }
+CoSIA_Vignette_expression_human_rat_tissue <- CoSIA::getGExMetrics(CoSIAn_Obj_Vignette_diversity_specificity_convert)
+CoSIA_Vignette_diversity_specificity_tissue_plot <- CoSIA::plotCVGEx(CoSIA_Vignette_expression_human_rat_tissue)
+CoSIA_Vignette_diversity_specificity_tissue_plot
+
+end_time <- Sys.time()
+
+time.loop <- end_time - beginning_time
+cat("Time elapsed: ", round((time.loop),3), " minutes")
+```
