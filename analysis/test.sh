@@ -20,6 +20,8 @@ ensure_sif() {
 CACHE_BASE="/data/user/$USER/bioconductor/bioc-cache"
 TMP_BASE="/data/user/$USER/bioconductor/bioc-tmp"
 
+ensure_sif
+
 mkdir -p \
   "$CACHE_BASE/home" \
   "$CACHE_BASE/annotationhub" \
