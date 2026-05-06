@@ -6,17 +6,18 @@
 beginning_time <- Sys.time()
 source('./analysis/functions/CoSIA_Instance.R')
 
-if ( 'dplyr' %in% installed.packages() )
-  remove.packages("dplyr")
-install.packages("dplyr", dependencies=TRUE)
+# if ( 'dplyr' %in% installed.packages() )
+#   remove.packages("dplyr")
+# install.packages("dplyr", dependencies=TRUE)
 library(dplyr)
 
-if (!require("BiocManager", quietly = TRUE))
-  install.packages("BiocManager")
-BiocManager::install("CoSIA")
+# if (!require("BiocManager", quietly = TRUE))
+#   install.packages("BiocManager")
+# BiocManager::install("CoSIA")
 
 # Loading Dependencies
-library(CoSIA)
+# library(CoSIA)
+devtools::load_all(".")
 
 # Get Tissues For Species
 input_species <- c("h_sapiens")

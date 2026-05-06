@@ -5,24 +5,25 @@
 beginning_time <- Sys.time()
 source('./analysis/functions/CoSIA_Instance.R')
 
-if ( 'dplyr' %in% installed.packages() )
-  remove.packages("dplyr")
-install.packages("dplyr", dependencies=TRUE)
+# if ( 'dplyr' %in% installed.packages() )
+#   remove.packages("dplyr")
+# install.packages("dplyr", dependencies=TRUE)
 library(dplyr)
 
-if (!require("BiocManager", quietly = TRUE))
-  install.packages("BiocManager")
-BiocManager::install("CoSIA")
+# if (!require("BiocManager", quietly = TRUE))
+#   install.packages("BiocManager")
+# BiocManager::install("CoSIA")
 
 # Loading Dependencies
-library(CoSIA)
+# library(CoSIA)
+devtools::load_all(".")
 
 # Get Tissues For Species
 input_species <- c("h_sapiens")
 model_comparing <- c("m_musculus")
 output_species <- c(model_comparing, input_species)
 
-# From Vignette: 
+# From Vignette:
 # NOTE: To compare across all shared tissues for your selected species,
 # you can assign the getTissues output to an object as input for map_tissues
 # when initializing a CoSIAn object. Was unable to do so, but was able to
