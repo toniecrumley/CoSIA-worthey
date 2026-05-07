@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PROJECT_PATH="/data/user/$USER/CoSIA"
-DEV_PATH="/data/user/$USER/CoSIA"
+PROJECT_PATH="/data/user/$USER/CoSIA-worthey"
+DEV_PATH="/data/user/$USER/CoSIA-worthey"
 CONTAINER_PATH="$PROJECT_PATH/bin/container"
 SIF="${CONTAINER_PATH}/bioc_cosia_1.10.0.sif"
 SIF_URI="${COSIA_SIF_URI:-docker://lizzyr/bioc_cosia:1.10.0}"
